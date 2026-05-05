@@ -1,114 +1,42 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Livraria Moderna</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --bg: #f8f9fa;
-            --text: #333;
-        }
+from flask import Flask, jsonify, render_template
+from flask_cors import CORS
+from interface.livro_controller import LivroController
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+app = Flask(__name__, template_folder='.')
+CORS(app)
+controller = LivroController()
 
-        h1 { margin: 40px 0 10px 0; color: var(--primary); font-weight: 300; font-size: 2.5rem; }
+# --- ROTAS DE PÁGINA (FRONTEND) ---
+@app.route("/")
+def index():
+    return render_template('index.html')
 
-        .container {
-            width: 90%;
-            max-width: 1000px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            padding-bottom: 50px;
-        }
+@app.route("/compra")
+def pagina_compra():
+    return render_template('compra.html')
 
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+@app.route("/compras")
+def pagina_historico():
+    return render_template('compras.html')
 
-        .card:hover { transform: translateY(-5px); }
+# --- ROTAS DE API (BACKEND) ---
+@app.route("/api/livros", methods=['GET'])
+def listar_livros():
+    livros_objetos = controller.listar_livros()
+    return jsonify([{"id": i, "nome": l.nome, "preco": l.preco} for i, l in enumerate(livros_objetos)])
 
-        .card h3 { margin: 0 0 10px 0; color: var(--primary); }
+@app.route("/api/comprar/<int:id>", methods=['POST', 'GET'])
+def comprar(id):
+    livros = controller.listar_livros()
+    if id < 0 or id >= len(livros): return jsonify({"erro": "Não encontrado"}), 404
+    livro = livros[id]
+    controller.comprar_livro(livro.nome, livro.preco)
+    return jsonify({"mensagem": "Sucesso!", "livro": {"nome": livro.nome, "preco": livro.preco}})
 
-        .price {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #27ae60;
-            margin-bottom: 20px;
-        }
+@app.route("/api/compras", methods=['GET'])
+def listar_compras():
+    compras = controller.listar_compras()
+    return jsonify({"historico_compras": [{"nome": c.nome, "preco": c.preco} for c in compras]})
 
-        .btn-buy {
-            text-align: center;
-            background: var(--accent);
-            color: white;
-            padding: 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .btn-buy:hover { background: #2980b9; }
-    </style>
-</head>
-<body>
-
-    <h1> Nossa Livraria</h1>
-
-    <div style="text-align: center; margin-bottom: 30px;">
-        <!-- AJUSTE: Mudou de compras.html para /compras -->
-        <a href="/compras" style="color: var(--accent); text-decoration: none; font-size: 1.1rem; font-weight: bold;">
-            Ver Histórico de Compras
-        </a>
-    </div>
-
-    <!-- Container vazio: O JS vai injetar os cards aqui -->
-    <div class="container" id="lista-livros">
-        <p style="text-align: center; width: 100%;">Carregando livros da API...</p>
-    </div>
-
-    <script>
-        // URL atualizada para o backend no Azure
-        fetch('https://api-livraria-gabriel-fecsekcwcebngudz.canadacentral-01.azurewebsites.net/api/livros')
-            .then(resposta => resposta.json())
-            .then(livros => {
-                const container = document.getElementById('lista-livros');
-                container.innerHTML = ''; // Limpa a mensagem de carregando
-
-                livros.forEach(livro => {
-                    container.innerHTML += `
-                        <div class="card">
-                            <div>
-                                <h3>${livro.nome}</h3>
-                                <p class="price">R$ ${parseFloat(livro.preco).toFixed(2)}</p>
-                            </div>
-                            <!-- AJUSTE: Mudou de compra.html para /compra -->
-                            <a href="/compra?id=${livro.id}" class="btn-buy">Comprar Agora</a>
-                        </div>
-                    `;
-                });
-            })
-            .catch(erro => {
-                document.getElementById('lista-livros').innerHTML = '<p style="color:red;">Erro ao carregar os livros. O servidor está rodando?</p>';
-                console.error("Erro na API:", erro);
-            });
-    </script>
-
-</body>
-</html>
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
