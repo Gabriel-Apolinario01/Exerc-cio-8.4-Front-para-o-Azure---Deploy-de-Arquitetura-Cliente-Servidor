@@ -76,33 +76,39 @@
 </head>
 <body>
 
-<h1> Histórico de Compras</h1>
+<h1>Histórico de Compras</h1>
 
-<!-- O JS vai injetar as compras aqui -->
 <div class="container" id="lista-historico">
-    <p class="empty" id="loading-msg">Carregando histórico...</p>
+    <p class="empty">Carregando histórico...</p>
 </div>
 
-<a href="/" class="back-link"> Voltar para a loja</a>
+<a href="/" class="back-link">Voltar para a loja</a>
 
 <script>
-    // URL Backend no Azure
     const backendUrl = 'https://api-livraria-gabriel-fecsekcwcebngudz.canadacentral-01.azurewebsites.net/api/compras';
 
     fetch(backendUrl)
-        .then(resposta => resposta.json())
+        .then(resposta => {
+            if (!resposta.ok) {
+                throw new Error("Erro na resposta da API");
+            }
+            return resposta.json();
+        })
         .then(dados => {
+            console.log("Dados recebidos:", dados);
+
             const container = document.getElementById('lista-historico');
+            const lista = dados.historico_compras || [];
 
-            if (dados.historico_compras && dados.historico_compras.length > 0) {
-                container.innerHTML = ''; 
+            container.innerHTML = '';
 
-                dados.historico_compras.forEach(compra => {
+            if (lista.length > 0) {
+                lista.forEach(compra => {
                     container.innerHTML += `
-                    <div class="card">
-                        <h3>${compra.nome}</h3>
-                        <span class="price">R$ ${parseFloat(compra.preco).toFixed(2)}</span>
-                    </div>
+                        <div class="card">
+                            <h3>${compra.nome}</h3>
+                            <span class="price">R$ ${parseFloat(compra.preco).toFixed(2)}</span>
+                        </div>
                     `;
                 });
             } else {
@@ -110,8 +116,10 @@
             }
         })
         .catch(erro => {
-            document.getElementById('lista-historico').innerHTML = '<p class="empty" style="color:red;">Erro ao buscar histórico.</p>';
-            console.error("Erro na API:", erro);
+            console.error("Erro ao buscar histórico:", erro);
+
+            document.getElementById('lista-historico').innerHTML =
+                '<p class="empty" style="color:red;">Erro ao carregar histórico.</p>';
         });
 </script>
 
