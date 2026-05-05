@@ -44,16 +44,9 @@
         }
 
         .card:hover { transform: translateY(-5px); }
-
         .card h3 { margin: 0 0 10px 0; color: var(--primary); }
-
-        .price {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #27ae60;
-            margin-bottom: 20px;
-        }
-
+        .price { font-size: 1.2rem; font-weight: bold; color: #27ae60; margin-bottom: 20px; }
+        
         .btn-buy {
             text-align: center;
             background: var(--accent);
@@ -72,24 +65,24 @@
     <h1> Nossa Livraria</h1>
 
     <div style="text-align: center; margin-bottom: 30px;">
-        <!-- AJUSTE: Mudou de compras.html para /compras -->
+        <!-- AJUSTE: Link para a ROTA /compras -->
         <a href="/compras" style="color: var(--accent); text-decoration: none; font-size: 1.1rem; font-weight: bold;">
             Ver Histórico de Compras
         </a>
     </div>
 
-    <!-- Container vazio: O JS vai injetar os cards aqui -->
     <div class="container" id="lista-livros">
         <p style="text-align: center; width: 100%;">Carregando livros da API...</p>
     </div>
 
     <script>
-        // URL atualizada para o backend no Azure
-        fetch('https://api-livraria-gabriel-fecsekcwcebngudz.canadacentral-01.azurewebsites.net/api/livros')
+        const API_URL = 'https://api-livraria-gabriel-fecsekcwcebngudz.canadacentral-01.azurewebsites.net/api/livros';
+
+        fetch(API_URL)
             .then(resposta => resposta.json())
             .then(livros => {
                 const container = document.getElementById('lista-livros');
-                container.innerHTML = ''; // Limpa a mensagem de carregando
+                container.innerHTML = ''; 
 
                 livros.forEach(livro => {
                     container.innerHTML += `
@@ -98,7 +91,7 @@
                                 <h3>${livro.nome}</h3>
                                 <p class="price">R$ ${parseFloat(livro.preco).toFixed(2)}</p>
                             </div>
-                            <!-- AJUSTE: Mudou de compra.html para /compra -->
+                            <!-- AJUSTE: Redireciona para a ROTA /compra -->
                             <a href="/compra?id=${livro.id}" class="btn-buy">Comprar Agora</a>
                         </div>
                     `;
