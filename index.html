@@ -83,21 +83,20 @@
     </div>
 
     <script>
-        fetch('http://127.0.0.1:5000/api/livros')
+        // URL atualizada para o backend no Azure
+        fetch('https://api-livraria-gabriel-fecsekcwcebngudz.canadacentral-01.azurewebsites.net/api/livros')
             .then(resposta => resposta.json())
             .then(livros => {
                 const container = document.getElementById('lista-livros');
                 container.innerHTML = ''; // Limpa a mensagem de carregando
 
                 livros.forEach(livro => {
-                    // Mantendo exatamente a mesma estrutura HTML e classes do seu card
                     container.innerHTML += `
                         <div class="card">
                             <div>
                                 <h3>${livro.nome}</h3>
                                 <p class="price">R$ ${parseFloat(livro.preco).toFixed(2)}</p>
                             </div>
-                            <!-- O link agora leva o ID do livro na URL -->
                             <a href="compra.html?id=${livro.id}" class="btn-buy">Comprar Agora</a>
                         </div>
                     `;
