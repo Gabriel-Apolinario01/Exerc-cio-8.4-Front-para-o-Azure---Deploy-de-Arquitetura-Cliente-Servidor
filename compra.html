@@ -57,9 +57,12 @@
     const urlParams = new URLSearchParams(window.location.search);
     const idLivro = urlParams.get('id');
 
+    // URL Backend no Azure
+    const backendBaseUrl = 'https://api-livraria-gabriel-fecsekcwcebngudz.canadacentral-01.azurewebsites.net';
+
     if (idLivro !== null) {
-        // Envia a requisição para efetivar a compra no back-end
-        fetch(`http://127.0.0.1:5000/api/comprar/${idLivro}`)
+        // Envia a requisição para efetivar a compra no back-end do Azure
+        fetch(`${backendBaseUrl}/api/comprar/${idLivro}`)
             .then(resposta => resposta.json())
             .then(dados => {
                 const card = document.getElementById('resultado-compra');
@@ -68,7 +71,6 @@
                     card.innerHTML = `<h1 style="color: red;">Erro: ${dados.erro}</h1>
                                       <a href="index.html" class="back-link">Voltar para a loja</a>`;
                 } else {
-                    // Monta o recibo com o estilo bonito que você criou
                     card.innerHTML = `
                         <div class="icon">✅</div>
                         <h1>Pedido Confirmado!</h1>
@@ -84,7 +86,10 @@
                     `;
                 }
             })
-            .catch(erro => console.error("Erro ao efetuar compra:", erro));
+            .catch(erro => {
+                console.error("Erro ao efetuar compra:", erro);
+                document.getElementById('resultado-compra').innerHTML = "<h1>Erro de conexão com o servidor.</h1><a href='index.html' class='back-link'>Voltar para a loja</a>";
+            });
     } else {
         document.getElementById('resultado-compra').innerHTML = "<h1>Nenhum livro selecionado.</h1><a href='index.html' class='back-link'>Voltar para a loja</a>";
     }
