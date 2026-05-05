@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Histórico de Compras</title>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f8f9fa;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 40px 0 20px 0;
+            color: var(--primary);
+            font-weight: 300;
+            font-size: 2.2rem;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card h3 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+            margin-top: 20px;
+        }
+
+        .back-link {
+            margin-top: 30px;
+            text-decoration: none;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<h1> Histórico de Compras</h1>
+
+<!-- O JS vai injetar as compras aqui -->
+<div class="container" id="lista-historico">
+    <p class="empty" id="loading-msg">Carregando histórico...</p>
+</div>
+
+<a href="index.html" class="back-link"> Voltar para a loja</a>
+
+<script>
+    fetch('http://127.0.0.1:5000/api/compras')
+        .then(resposta => resposta.json())
+        .then(dados => {
+            const container = document.getElementById('lista-historico');
+
+            // Verifica se tem alguma compra no array que veio do backend
+            if (dados.historico_compras && dados.historico_compras.length > 0) {
+                container.innerHTML = ''; // Limpa a mensagem
+
+                dados.historico_compras.forEach(compra => {
+                    // Coloca o nome e o preço (formatado com 2 casas decimais) nos cards
+                    container.innerHTML += `
+                    <div class="card">
+                        <h3>${compra.nome}</h3>
+                        <span class="price">R$ ${parseFloat(compra.preco).toFixed(2)}</span>
+                    </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = '<p class="empty">Nenhuma compra realizada ainda.</p>';
+            }
+        })
+        .catch(erro => {
+            document.getElementById('lista-historico').innerHTML = '<p class="empty" style="color:red;">Erro ao buscar histórico.</p>';
+            console.error("Erro na API:", erro);
+        });
+</script>
+
+</body>
+</html>
