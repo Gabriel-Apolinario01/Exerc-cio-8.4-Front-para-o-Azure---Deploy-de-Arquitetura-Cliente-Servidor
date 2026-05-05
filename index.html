@@ -72,7 +72,8 @@
     <h1> Nossa Livraria</h1>
 
     <div style="text-align: center; margin-bottom: 30px;">
-        <a href="compras.html" style="color: var(--accent); text-decoration: none; font-size: 1.1rem; font-weight: bold;">
+        <!-- AJUSTE: Mudou de compras.html para /compras -->
+        <a href="/compras" style="color: var(--accent); text-decoration: none; font-size: 1.1rem; font-weight: bold;">
             Ver Histórico de Compras
         </a>
     </div>
@@ -97,7 +98,8 @@
                                 <h3>${livro.nome}</h3>
                                 <p class="price">R$ ${parseFloat(livro.preco).toFixed(2)}</p>
                             </div>
-                            <a href="compra.html?id=${livro.id}" class="btn-buy">Comprar Agora</a>
+                            <!-- AJUSTE: Mudou de compra.html para /compra -->
+                            <a href="/compra?id=${livro.id}" class="btn-buy">Comprar Agora</a>
                         </div>
                     `;
                 });
