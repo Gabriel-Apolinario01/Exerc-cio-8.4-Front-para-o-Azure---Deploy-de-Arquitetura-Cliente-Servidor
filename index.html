@@ -2,7 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Livraria Moderna</title>
+    <title>Histórico de Compras</title>
+
     <style>
         :root {
             --primary: #2c3e50;
@@ -21,92 +22,98 @@
             align-items: center;
         }
 
-        h1 { margin: 40px 0 10px 0; color: var(--primary); font-weight: 300; font-size: 2.5rem; }
+        h1 {
+            margin: 40px 0 20px 0;
+            color: var(--primary);
+            font-weight: 300;
+            font-size: 2.2rem;
+        }
 
         .container {
             width: 90%;
-            max-width: 1000px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            padding-bottom: 50px;
+            max-width: 800px;
         }
 
         .card {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
             display: flex;
-            flex-direction: column;
             justify-content: space-between;
+            align-items: center;
         }
 
-        .card:hover { transform: translateY(-5px); }
-
-        .card h3 { margin: 0 0 10px 0; color: var(--primary); }
+        .card h3 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
 
         .price {
-            font-size: 1.2rem;
             font-weight: bold;
             color: #27ae60;
-            margin-bottom: 20px;
         }
 
-        .btn-buy {
+        .empty {
             text-align: center;
-            background: var(--accent);
-            color: white;
-            padding: 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
+            color: #777;
+            margin-top: 20px;
         }
 
-        .btn-buy:hover { background: #2980b9; }
+        .back-link {
+            margin-top: 30px;
+            text-decoration: none;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
-    <h1> Nossa Livraria</h1>
+<h1> Histórico de Compras</h1>
 
-    <div style="text-align: center; margin-bottom: 30px;">
-        <a href="compras.html" style="color: var(--accent); text-decoration: none; font-size: 1.1rem; font-weight: bold;">
-            Ver Histórico de Compras
-        </a>
-    </div>
+<!-- O JS vai injetar as compras aqui -->
+<div class="container" id="lista-historico">
+    <p class="empty" id="loading-msg">Carregando histórico...</p>
+</div>
 
-    <!-- Container vazio: O JS vai injetar os cards aqui -->
-    <div class="container" id="lista-livros">
-        <p style="text-align: center; width: 100%;">Carregando livros da API...</p>
-    </div>
+<a href="index.html" class="back-link"> Voltar para a loja</a>
 
-    <script>
-        // URL atualizada para o backend no Azure
-        fetch('https://api-livraria-gabriel-fecsekcwcebngudz.canadacentral-01.azurewebsites.net/api/livros')
-            .then(resposta => resposta.json())
-            .then(livros => {
-                const container = document.getElementById('lista-livros');
-                container.innerHTML = ''; // Limpa a mensagem de carregando
+<script>
+    // URL Backend no Azure
+    const backendUrl = 'https://api-livraria-gabriel-fecsekcwcebngudz.canadacentral-01.azurewebsites.net/api/compras';
 
-                livros.forEach(livro => {
+    fetch(backendUrl)
+        .then(resposta => resposta.json())
+        .then(dados => {
+            const container = document.getElementById('lista-historico');
+
+            if (dados.historico_compras && dados.historico_compras.length > 0) {
+                container.innerHTML = ''; 
+
+                dados.historico_compras.forEach(compra => {
                     container.innerHTML += `
-                        <div class="card">
-                            <div>
-                                <h3>${livro.nome}</h3>
-                                <p class="price">R$ ${parseFloat(livro.preco).toFixed(2)}</p>
-                            </div>
-                            <a href="compra.html?id=${livro.id}" class="btn-buy">Comprar Agora</a>
-                        </div>
+                    <div class="card">
+                        <h3>${compra.nome}</h3>
+                        <span class="price">R$ ${parseFloat(compra.preco).toFixed(2)}</span>
+                    </div>
                     `;
                 });
-            })
-            .catch(erro => {
-                document.getElementById('lista-livros').innerHTML = '<p style="color:red;">Erro ao carregar os livros. O servidor está rodando?</p>';
-                console.error("Erro na API:", erro);
-            });
-    </script>
+            } else {
+                container.innerHTML = '<p class="empty">Nenhuma compra realizada ainda.</p>';
+            }
+        })
+        .catch(erro => {
+            document.getElementById('lista-historico').innerHTML = '<p class="empty" style="color:red;">Erro ao buscar histórico.</p>';
+            console.error("Erro na API:", erro);
+        });
+</script>
 
 </body>
 </html>
